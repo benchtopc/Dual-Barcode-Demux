@@ -1,0 +1,11 @@
+name: dual-barcode-demux-nf
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.11
+  - nextflow
+  - minimap2
+  - samtools
+  - bcftools
+  - clair3

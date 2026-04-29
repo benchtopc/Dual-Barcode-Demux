@@ -1,0 +1,15 @@
+Dual-Barcode-Demux
+Copyright 2026 SCM
+
+This workflow implements a demultiplexing workflow for 96-well combinatorial
+row/column barcodes based on the published primer/barcode design described in
+Nussbaum et al. The software implementation, packaging, and workflow interface
+are authored by SCM.
+
+This workflow is provided for research and educational use only. It is not
+intended for clinical diagnosis, medical decision-making, patient care, or
+regulated laboratory use without independent validation. See DISCLAIMER.md.
+
+Oxford Nanopore Technologies, EPI2ME, Dorado, and Nextflow are trademarks or
+software projects of their respective owners. This repository is not affiliated
+with, endorsed by, or maintained by Oxford Nanopore Technologies.

@@ -1,0 +1,18 @@
+{
+  "name": "Dual-Barcode-Demux",
+  "workflow_title": "Dual Barcode Demux SM",
+  "author": "SCM",
+  "version": "0.4.0",
+  "license": "Apache-2.0",
+  "description": "EPI2ME-compatible dual-barcode demultiplexing, alignment, Clair3 GPU variant calling, IGV, and KO analysis workflow.",
+  "mainScript": "main.nf",
+  "schema": "nextflow_schema.json",
+  "nextflowVersion": ">=23.10.0",
+  "source": "local-source-package",
+  "notes": [
+    "This is a source-only local workflow package.",
+    "If EPI2ME rejects this 2ME file, use GitHub URL import."
+  ],
+  "title": "Dual-Barcode-Demux",
+  "disclaimer": "Research use only. Not intended for clinical diagnosis, medical decision-making, patient care, or regulated laboratory use. Provided AS IS without warranty or liability to the maximum extent permitted by law."
+}

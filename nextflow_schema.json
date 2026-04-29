@@ -1,0 +1,346 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://github.com/benchtopc/Dual-Barcode-Demux/nextflow_schema.json",
+  "title": "Dual-Barcode-Demux",
+  "description": "EPI2ME-compatible Nextflow workflow for SCM dual-barcode demultiplexing, per-sample alignment, Clair3 GPU variant calling, KO classification, and IGV reports.",
+  "type": "object",
+  "definitions": {
+    "input_options": {
+      "title": "Input Options",
+      "type": "object",
+      "fa_icon": "fas fa-file-import",
+      "description": "Input FASTQ and plate map.",
+      "properties": {
+        "fastq": {
+          "type": "string",
+          "format": "path",
+          "title": "Input FASTQ",
+          "description": "Untrimmed FASTQ or FASTQ.GZ file containing barcode/linker sequence."
+        },
+        "plate_map": {
+          "type": "string",
+          "format": "path",
+          "title": "Plate map CSV",
+          "description": "CSV with well_id,row_id,column_id,row_barcode_id,column_barcode_id,sample_id,alias."
+        },
+        "row_barcodes": {
+          "type": "string",
+          "format": "path",
+          "default": "data/scm_row_barcodes.csv",
+          "title": "Row barcode CSV",
+          "description": "Optional row barcode table override."
+        },
+        "column_barcodes": {
+          "type": "string",
+          "format": "path",
+          "default": "data/scm_column_barcodes.csv",
+          "title": "Column barcode CSV",
+          "description": "Optional column barcode table override."
+        }
+      },
+      "required": [
+        "fastq",
+        "plate_map"
+      ]
+    },
+    "barcode_scoring": {
+      "title": "Barcode Scoring",
+      "type": "object",
+      "fa_icon": "fas fa-barcode",
+      "properties": {
+        "front_window": {
+          "type": "integer",
+          "minimum": 30,
+          "default": 200,
+          "title": "Front search window"
+        },
+        "rear_window": {
+          "type": "integer",
+          "minimum": 30,
+          "default": 200,
+          "title": "Rear search window"
+        },
+        "max_linker_mismatches": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 2,
+          "title": "Max linker mismatches"
+        },
+        "max_total_score": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 4,
+          "title": "Max total barcode score"
+        },
+        "min_margin": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 2,
+          "title": "Min winner margin"
+        },
+        "keep_partial": {
+          "type": "boolean",
+          "default": true,
+          "title": "Keep partial calls"
+        }
+      }
+    },
+    "alignment_options": {
+      "title": "Alignment / KO / IGV Options",
+      "type": "object",
+      "fa_icon": "fas fa-dna",
+      "properties": {
+        "run_alignment": {
+          "type": "boolean",
+          "default": false,
+          "title": "Run alignment and KO analysis"
+        },
+        "reference": {
+          "type": "string",
+          "format": "path",
+          "title": "Reference FASTA",
+          "description": "Reference FASTA used for minimap2 and variant calling."
+        },
+        "ko_targets": {
+          "type": "string",
+          "format": "path",
+          "default": "templates/ko_targets.template.tsv",
+          "title": "KO target TSV"
+        },
+        "aligner_preset": {
+          "type": "string",
+          "default": "map-ont",
+          "title": "minimap2 preset"
+        },
+        "alignment_threads": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 4,
+          "title": "Alignment/variant threads"
+        },
+        "min_mapq": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 10,
+          "title": "Minimum MAPQ"
+        },
+        "min_baseq": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 7,
+          "title": "Minimum base quality for bcftools"
+        },
+        "min_depth_ko": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10,
+          "title": "Minimum KO depth"
+        },
+        "het_min_af": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.25,
+          "title": "Heterozygous KO AF threshold"
+        },
+        "hom_alt_min_af": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.8,
+          "title": "Homozygous KO AF threshold"
+        },
+        "keep_unfiltered_bam": {
+          "type": "boolean",
+          "default": false,
+          "title": "Keep unfiltered BAM"
+        },
+        "variant_caller": {
+          "type": "string",
+          "default": "bcftools",
+          "enum": [
+            "bcftools",
+            "clair3",
+            "clair3_gpu"
+          ],
+          "title": "Variant caller",
+          "description": "Use bcftools for portable CPU calling, clair3 for CPU Clair3, or clair3_gpu for NVIDIA GPU Clair3."
+        },
+        "igv_locus": {
+          "type": "string",
+          "default": "all",
+          "title": "Initial IGV locus"
+        }
+      }
+    },
+    "clair3_options": {
+      "title": "Clair3 Model / GPU Options",
+      "type": "object",
+      "fa_icon": "fas fa-microchip",
+      "properties": {
+        "clair3_model_path": {
+          "type": "string",
+          "default": "/opt/models/r1041_e82_400bps_sup_v500",
+          "title": "Clair3 model path inside container",
+          "description": "Bundled Clair3 model path or staged local model path. Ignored when clair3_model_dir is supplied."
+        },
+        "clair3_model_dir": {
+          "type": "string",
+          "format": "path",
+          "default": "",
+          "title": "Optional local Clair3 model directory",
+          "description": "Local folder containing Clair3 v2 model files such as pileup.pt and full_alignment.pt. When set, this staged folder overrides clair3_model_path."
+        },
+        "clair3_platform": {
+          "type": "string",
+          "default": "ont",
+          "enum": [
+            "ont",
+            "hifi",
+            "ilmn"
+          ],
+          "title": "Clair3 platform"
+        },
+        "clair3_bed": {
+          "type": "string",
+          "format": "path",
+          "default": "templates/empty.bed",
+          "title": "Optional Clair3 BED file"
+        },
+        "clair3_ctg_name": {
+          "type": "string",
+          "default": "",
+          "title": "Optional Clair3 ctg_name"
+        },
+        "clair3_enable_dwell_time": {
+          "type": "boolean",
+          "default": false,
+          "title": "Enable dwell-time / mv-tag model support",
+          "description": "Requires Dorado BAMs with mv tags and a compatible signal-aware Clair3 model."
+        },
+        "clair3_include_all_ctgs": {
+          "type": "boolean",
+          "default": true,
+          "title": "Include all contigs"
+        },
+        "clair3_haploid_mode": {
+          "type": "string",
+          "default": "none",
+          "enum": [
+            "none",
+            "haploid_precise",
+            "haploid_sensitive"
+          ],
+          "title": "Haploid mode"
+        },
+        "clair3_no_phasing_for_fa": {
+          "type": "boolean",
+          "default": false,
+          "title": "Disable full-alignment phasing"
+        },
+        "clair3_pileup_only": {
+          "type": "boolean",
+          "default": false,
+          "title": "Pileup-only Clair3"
+        },
+        "clair3_print_ref_calls": {
+          "type": "boolean",
+          "default": false,
+          "title": "Print reference calls"
+        },
+        "clair3_gvcf": {
+          "type": "boolean",
+          "default": false,
+          "title": "Emit gVCF"
+        },
+        "clair3_qual": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 2,
+          "title": "Clair3 PASS quality threshold"
+        },
+        "clair3_chunk_size": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "title": "Clair3 chunk size override"
+        },
+        "clair3_remove_intermediate_dir": {
+          "type": "boolean",
+          "default": true,
+          "title": "Remove Clair3 intermediate files"
+        },
+        "enable_gpu": {
+          "type": "boolean",
+          "default": false,
+          "title": "Enable GPU passthrough"
+        },
+        "gpu_devices": {
+          "type": "string",
+          "default": "all",
+          "title": "Docker GPU devices"
+        },
+        "clair3_device": {
+          "type": "string",
+          "default": "cuda:0",
+          "title": "Clair3 device"
+        },
+        "clair3_extra_args": {
+          "type": "string",
+          "default": "",
+          "title": "Advanced Clair3 extra arguments"
+        },
+        "clair3_cpu_container": {
+          "type": "string",
+          "default": "hkubal/clair3:v2.0.1",
+          "title": "Clair3 CPU container"
+        },
+        "clair3_gpu_container": {
+          "type": "string",
+          "default": "hkubal/clair3:v2.0.1_gpu",
+          "title": "Clair3 GPU container"
+        }
+      }
+    },
+    "output_options": {
+      "title": "Output Options",
+      "type": "object",
+      "fa_icon": "fas fa-folder-open",
+      "properties": {
+        "out_dir": {
+          "type": "string",
+          "default": "output",
+          "title": "Output directory"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "#/definitions/input_options"
+    },
+    {
+      "$ref": "#/definitions/barcode_scoring"
+    },
+    {
+      "$ref": "#/definitions/alignment_options"
+    },
+    {
+      "$ref": "#/definitions/clair3_options"
+    },
+    {
+      "$ref": "#/definitions/output_options"
+    }
+  ],
+  "workflow_title": "Dual Barcode Demux",
+  "url": "https://github.com/benchtopc/Dual-Barcode-Demux",
+  "demo_url": "https://github.com/benchtopc/Dual-Barcode-Demux/raw/main/tests/data/demo_data.tar.gz",
+  "aws_demo_url": "https://github.com/benchtopc/Dual-Barcode-Demux/raw/main/tests/data/demo_data.tar.gz",
+  "resources": [
+    "docker",
+    "gpu"
+  ],
+  "license": "Apache-2.0",
+  "version": "0.4.0",
+  "disclaimer": "Research use only. Not for clinical or regulated use without independent validation."
+}

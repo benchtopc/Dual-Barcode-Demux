@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this workflow, please cite the software repository and the original barcode-design publication."
+title: "Dual-Barcode-Demux: SCM dual-barcode demultiplexing, alignment, Clair3 GPU variant calling, IGV, and KO analysis workflow"
+authors:
+  - name: "SCM"
+version: "0.4.0"
+license: "Apache-2.0"
+repository-code: "https://github.com/benchtopc/Dual-Barcode-Demux"
+keywords:
+  - nanopore
+  - nextflow
+  - epi2me
+  - demultiplexing
+  - minimap2
+  - clair3
+  - gpu
+  - igv
+  - variant-calling
+  - knockout

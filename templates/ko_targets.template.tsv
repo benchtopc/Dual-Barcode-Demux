@@ -1,0 +1,4 @@
+target_id	contig	start	end	wt_allele	ko_allele	ko_type	expected_effect	notes
+demo_A01_site	target_A01	10	10	C	T	allele	example_snv	Replace with your CRISPR/editing target coordinates and expected KO allele.
+demo_H12_site	target_H12	10	10	G	A	allele	example_snv	Rows with no supported KO allele are reported as WT when depth is sufficient.
+example_deletion_target	chr1	1000	1010	REFERENCE_SEGMENT	<DEL>	deletion	frameshift	Use deletion for knockout calls supported by overlapping deletion alleles.
